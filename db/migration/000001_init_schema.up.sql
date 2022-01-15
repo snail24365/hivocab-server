@@ -1,17 +1,17 @@
 CREATE TABLE "word" (
   "id" bigserial PRIMARY KEY,
-  "word" varchar NOT NULL
+  "spelling" varchar NOT NULL
 );
 
-CREATE TABLE "usages" (
+CREATE TABLE "usecase" (
   "id" bigserial PRIMARY KEY,
   "word_id" bigint NOT NULL,
-  "description" varchar NOT NULL
+  "description_sentence" varchar NOT NULL
 );
 
 CREATE TABLE "example" (
   "id" bigserial PRIMARY KEY,
-  "usage_id" bigint NOT NULL,
+  "usecase_id" bigint NOT NULL,
   "sentence" varchar NOT NULL
 );
 
@@ -29,23 +29,23 @@ CREATE TABLE "users" (
 CREATE TABLE "writing" (
   "id" bigserial PRIMARY KEY,
   "writing" varchar NOT NULL,
-  "usage_id" bigint NOT NULL,
+  "usecase_id" bigint NOT NULL,
   "user_id" bigint NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
-ALTER TABLE "usages" ADD FOREIGN KEY ("word_id") REFERENCES "word" ("id");
+ALTER TABLE "usecase" ADD FOREIGN KEY ("word_id") REFERENCES "word" ("id");
 
-ALTER TABLE "example" ADD FOREIGN KEY ("usage_id") REFERENCES "usages" ("id");
+ALTER TABLE "example" ADD FOREIGN KEY ("usecase_id") REFERENCES "usecase" ("id");
 
-ALTER TABLE "writing" ADD FOREIGN KEY ("usage_id") REFERENCES "usages" ("id");
+ALTER TABLE "writing" ADD FOREIGN KEY ("usecase_id") REFERENCES "usecase" ("id");
 
 ALTER TABLE "writing" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
 
-CREATE INDEX ON "word" ("word");
+CREATE INDEX ON "word" ("spelling");
 
 CREATE INDEX ON "users" ("username");
 
 CREATE INDEX ON "writing" ("user_id");
 
-CREATE INDEX ON "writing" ("user_id", "usage_id");
+CREATE INDEX ON "writing" ("user_id", "usecase_id");
