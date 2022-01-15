@@ -1,7 +1,32 @@
 package main
 
-import "fmt"
+import (
+	"database/sql"
+	"log"
+
+	_ "github.com/lib/pq"
+	"github.com/snail24365/hivocab-server/api"
+	db "github.com/snail24365/hivocab-server/db/sqlc"
+)
+
+const (
+	dbDriver = "postgres"
+	dbSource = "postgresql://root:secret@localhost:5432/hivocab?sslmode=disable"
+	serverAddress = "0.0.0.0:8080"
+)
 
 func main() {
-	fmt.Printf("hello")
+	conn, err := sql.Open(dbDriver, dbSource)
+	if err != nil {
+		log.Fatal("cannot connect to db :", err)
+	}
+
+	store := db.NewStore(conn)
+	server := api.NewServer(store)
+
+	err = server.Start(serverAddress)
+	if err != nil {
+		log.Fatal("cannot start server:", err)
+	}
+
 }
