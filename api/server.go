@@ -10,7 +10,6 @@ type Server struct {
 	router *gin.Engine	
 }
 
-// 서버 생성 및 라우트 설정
 func NewServer(store *db.Store)	*Server {
 	server := &Server{store: store}
 	router := gin.Default()

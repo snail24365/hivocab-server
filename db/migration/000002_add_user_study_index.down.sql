@@ -1,1 +1,1 @@
-ALTER TABLE "user" DROP COLUMN study_index;
+ALTER TABLE "users" DROP COLUMN study_index;
