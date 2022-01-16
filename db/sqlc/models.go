@@ -27,6 +27,7 @@ type User struct {
 	StudyGoal         int32     `json:"study_goal"`
 	PasswordChangedAt time.Time `json:"password_changed_at"`
 	CreatedAt         time.Time `json:"created_at"`
+	StudyIndex        int64     `json:"study_index"`
 }
 
 type Word struct {

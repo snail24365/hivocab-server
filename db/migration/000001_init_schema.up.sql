@@ -15,7 +15,7 @@ CREATE TABLE "example" (
   "sentence" varchar NOT NULL
 );
 
-CREATE TABLE "users" (
+CREATE TABLE "user" (
   "id" bigserial PRIMARY KEY,
   "username" varchar NOT NULL,
   "password" varchar NOT NULL,
@@ -40,11 +40,11 @@ ALTER TABLE "example" ADD FOREIGN KEY ("usecase_id") REFERENCES "usecase" ("id")
 
 ALTER TABLE "writing" ADD FOREIGN KEY ("usecase_id") REFERENCES "usecase" ("id");
 
-ALTER TABLE "writing" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id");
+ALTER TABLE "writing" ADD FOREIGN KEY ("user_id") REFERENCES "user" ("id");
 
 CREATE INDEX ON "word" ("spelling");
 
-CREATE INDEX ON "users" ("username");
+CREATE INDEX ON "user" ("username");
 
 CREATE INDEX ON "writing" ("user_id");
 
