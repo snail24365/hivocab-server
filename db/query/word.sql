@@ -1,8 +1,9 @@
--- name: CreateWord :one
+-- name: InsertWord :one
 INSERT INTO word (
+  id,
   spelling
 ) VALUES (
-  $1
+  $1,$2
 )
 RETURNING *;
 
@@ -10,10 +11,17 @@ RETURNING *;
 SELECT * FROM word
 WHERE spelling = $1 LIMIT 1;
 
--- name: ListWordByPage :many
+-- name: GetWordById :one
+SELECT * FROM word
+WHERE id = $1;
+
+-- name: GetWordByPage :many
 SELECT * FROM word
 LIMIT $1
 OFFSET $2;
 
--- name: CountAllWords :one
+-- name: CountAllWord :one
 SELECT COUNT(*) FROM word;
+
+-- name: DeleteAllWord :exec
+DELETE FROM word;

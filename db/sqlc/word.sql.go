@@ -7,63 +7,56 @@ import (
 	"context"
 )
 
-const countAllWords = `-- name: CountAllWords :one
+const countAllWord = `-- name: CountAllWord :one
 SELECT COUNT(*) FROM word
 `
 
-func (q *Queries) CountAllWords(ctx context.Context) (int64, error) {
-	row := q.db.QueryRowContext(ctx, countAllWords)
+func (q *Queries) CountAllWord(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countAllWord)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
 }
 
-const createWord = `-- name: CreateWord :one
-INSERT INTO word (
-  spelling
-) VALUES (
-  $1
-)
-RETURNING id, spelling
+const deleteAllWord = `-- name: DeleteAllWord :exec
+DELETE FROM word
 `
 
-func (q *Queries) CreateWord(ctx context.Context, spelling string) (Word, error) {
-	row := q.db.QueryRowContext(ctx, createWord, spelling)
-	var i Word
-	err := row.Scan(&i.ID, &i.Spelling)
-	return i, err
+func (q *Queries) DeleteAllWord(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, deleteAllWord)
+	return err
 }
 
-const getWordBySpelling = `-- name: GetWordBySpelling :one
+const getWordById = `-- name: GetWordById :one
 SELECT id, spelling FROM word
-WHERE spelling = $1 LIMIT 1
+WHERE id = $1
 `
 
-func (q *Queries) GetWordBySpelling(ctx context.Context, spelling string) (Word, error) {
-	row := q.db.QueryRowContext(ctx, getWordBySpelling, spelling)
+func (q *Queries) GetWordById(ctx context.Context, id int64) (Word, error) {
+	row := q.db.QueryRowContext(ctx, getWordById, id)
 	var i Word
 	err := row.Scan(&i.ID, &i.Spelling)
 	return i, err
 }
 
-const listWordByPage = `-- name: ListWordByPage :many
+const getWordByPage = `-- name: GetWordByPage :many
 SELECT id, spelling FROM word
 LIMIT $1
 OFFSET $2
 `
 
-type ListWordByPageParams struct {
+type GetWordByPageParams struct {
 	Limit  int32 `json:"limit"`
 	Offset int32 `json:"offset"`
 }
 
-func (q *Queries) ListWordByPage(ctx context.Context, arg ListWordByPageParams) ([]Word, error) {
-	rows, err := q.db.QueryContext(ctx, listWordByPage, arg.Limit, arg.Offset)
+func (q *Queries) GetWordByPage(ctx context.Context, arg GetWordByPageParams) ([]Word, error) {
+	rows, err := q.db.QueryContext(ctx, getWordByPage, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Word
+	items := []Word{}
 	for rows.Next() {
 		var i Word
 		if err := rows.Scan(&i.ID, &i.Spelling); err != nil {
@@ -78,4 +71,38 @@ func (q *Queries) ListWordByPage(ctx context.Context, arg ListWordByPageParams) 
 		return nil, err
 	}
 	return items, nil
+}
+
+const getWordBySpelling = `-- name: GetWordBySpelling :one
+SELECT id, spelling FROM word
+WHERE spelling = $1 LIMIT 1
+`
+
+func (q *Queries) GetWordBySpelling(ctx context.Context, spelling string) (Word, error) {
+	row := q.db.QueryRowContext(ctx, getWordBySpelling, spelling)
+	var i Word
+	err := row.Scan(&i.ID, &i.Spelling)
+	return i, err
+}
+
+const insertWord = `-- name: InsertWord :one
+INSERT INTO word (
+  id,
+  spelling
+) VALUES (
+  $1,$2
+)
+RETURNING id, spelling
+`
+
+type InsertWordParams struct {
+	ID       int64  `json:"id"`
+	Spelling string `json:"spelling"`
+}
+
+func (q *Queries) InsertWord(ctx context.Context, arg InsertWordParams) (Word, error) {
+	row := q.db.QueryRowContext(ctx, insertWord, arg.ID, arg.Spelling)
+	var i Word
+	err := row.Scan(&i.ID, &i.Spelling)
+	return i, err
 }

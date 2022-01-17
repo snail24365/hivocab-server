@@ -7,41 +7,50 @@ import (
 	"context"
 )
 
-const createUsecase = `-- name: CreateUsecase :one
-INSERT INTO usecase (
-  word_id,
-  description_sentence
-) VALUES (
-  $1,
-  $2
-)
-RETURNING id, word_id, description_sentence
+const countAllUsecase = `-- name: CountAllUsecase :one
+SELECT COUNT(*) FROM usecase
 `
 
-type CreateUsecaseParams struct {
-	WordID              int64  `json:"word_id"`
-	DescriptionSentence string `json:"description_sentence"`
+func (q *Queries) CountAllUsecase(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countAllUsecase)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }
 
-func (q *Queries) CreateUsecase(ctx context.Context, arg CreateUsecaseParams) (Usecase, error) {
-	row := q.db.QueryRowContext(ctx, createUsecase, arg.WordID, arg.DescriptionSentence)
+const deleteAllUsecase = `-- name: DeleteAllUsecase :exec
+DELETE FROM usecase
+`
+
+func (q *Queries) DeleteAllUsecase(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, deleteAllUsecase)
+	return err
+}
+
+const getUsecaseById = `-- name: GetUsecaseById :one
+SELECT id, word_id, description_sentence FROM usecase
+WHERE id = $1
+`
+
+func (q *Queries) GetUsecaseById(ctx context.Context, id int64) (Usecase, error) {
+	row := q.db.QueryRowContext(ctx, getUsecaseById, id)
 	var i Usecase
 	err := row.Scan(&i.ID, &i.WordID, &i.DescriptionSentence)
 	return i, err
 }
 
-const listUsecaseByWord = `-- name: ListUsecaseByWord :many
+const getUsecaseByWord = `-- name: GetUsecaseByWord :many
 SELECT id, word_id, description_sentence FROM usecase
 WHERE word_id = $1
 `
 
-func (q *Queries) ListUsecaseByWord(ctx context.Context, wordID int64) ([]Usecase, error) {
-	rows, err := q.db.QueryContext(ctx, listUsecaseByWord, wordID)
+func (q *Queries) GetUsecaseByWord(ctx context.Context, wordID int64) ([]Usecase, error) {
+	rows, err := q.db.QueryContext(ctx, getUsecaseByWord, wordID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Usecase
+	items := []Usecase{}
 	for rows.Next() {
 		var i Usecase
 		if err := rows.Scan(&i.ID, &i.WordID, &i.DescriptionSentence); err != nil {
@@ -56,4 +65,30 @@ func (q *Queries) ListUsecaseByWord(ctx context.Context, wordID int64) ([]Usecas
 		return nil, err
 	}
 	return items, nil
+}
+
+const insertUsecase = `-- name: InsertUsecase :one
+INSERT INTO usecase (
+  id,
+  word_id,
+  description_sentence
+) VALUES (
+  $1,
+  $2,
+  $3
+)
+RETURNING id, word_id, description_sentence
+`
+
+type InsertUsecaseParams struct {
+	ID                  int64  `json:"id"`
+	WordID              int64  `json:"word_id"`
+	DescriptionSentence string `json:"description_sentence"`
+}
+
+func (q *Queries) InsertUsecase(ctx context.Context, arg InsertUsecaseParams) (Usecase, error) {
+	row := q.db.QueryRowContext(ctx, insertUsecase, arg.ID, arg.WordID, arg.DescriptionSentence)
+	var i Usecase
+	err := row.Scan(&i.ID, &i.WordID, &i.DescriptionSentence)
+	return i, err
 }

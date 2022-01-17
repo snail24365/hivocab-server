@@ -7,24 +7,47 @@ import (
 	"context"
 )
 
-const createExample = `-- name: CreateExample :one
+const countAllExample = `-- name: CountAllExample :one
+SELECT COUNT(*) FROM example
+`
+
+func (q *Queries) CountAllExample(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countAllExample)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const deleteAllExample = `-- name: DeleteAllExample :exec
+DELETE FROM example
+`
+
+func (q *Queries) DeleteAllExample(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, deleteAllExample)
+	return err
+}
+
+const insertExample = `-- name: InsertExample :one
 INSERT INTO example (
+  id,
   usecase_id,
   sentence
 ) VALUES (
   $1,
-  $2
+  $2,
+  $3
 )
 RETURNING id, usecase_id, sentence
 `
 
-type CreateExampleParams struct {
+type InsertExampleParams struct {
+	ID        int64  `json:"id"`
 	UsecaseID int64  `json:"usecase_id"`
 	Sentence  string `json:"sentence"`
 }
 
-func (q *Queries) CreateExample(ctx context.Context, arg CreateExampleParams) (Example, error) {
-	row := q.db.QueryRowContext(ctx, createExample, arg.UsecaseID, arg.Sentence)
+func (q *Queries) InsertExample(ctx context.Context, arg InsertExampleParams) (Example, error) {
+	row := q.db.QueryRowContext(ctx, insertExample, arg.ID, arg.UsecaseID, arg.Sentence)
 	var i Example
 	err := row.Scan(&i.ID, &i.UsecaseID, &i.Sentence)
 	return i, err
@@ -41,7 +64,7 @@ func (q *Queries) ListExampleByUsecase(ctx context.Context, usecaseID int64) ([]
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Example
+	items := []Example{}
 	for rows.Next() {
 		var i Example
 		if err := rows.Scan(&i.ID, &i.UsecaseID, &i.Sentence); err != nil {

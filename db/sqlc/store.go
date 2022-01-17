@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 type Store interface {
-
+	Querier
 }
 
 type SQLStore struct {
@@ -15,7 +15,7 @@ type SQLStore struct {
 }
 
 func NewStore(db *sql.DB) Store {
-	return SQLStore{
+	return &SQLStore{
 		db: db,
 		Queries: New(db),
 	}
@@ -36,27 +36,4 @@ func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) erro
 		return err
 	}
 	return tx.Commit()
-}
-
-type TransferTxParams struct {
-	FromAccountID int64 `json:"from_account_id"`
-}
-
-// TransferTxResult is the result of the transfer transaction
-type Exercise struct {
-	Word 			Word 				`json:"word"`
-	Usecase 	Usecase 		`json:"usecase"`
-	Examples  []Example   `json:"examples"`
-}
-
-
-// TransferTx performs a money transfer from one account to the other.
-// It creates the transfer, add account entries, and update accounts' balance within a database transaction
-func (store *SQLStore) GetExercise(ctx context.Context, userId int64) (Exercise, error) {
-	var exercise Exercise
-	
-	//exercise.Word = 
-
-
-	return exercise, nil
 }
