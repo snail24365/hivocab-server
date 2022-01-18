@@ -1,15 +1,15 @@
 package api
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	db "github.com/snail24365/hivocab-server/db/sqlc"
+	"github.com/snail24365/hivocab-server/token"
 )
 
 type Exercise struct {
-	Word 			db.Word 				`json:"word"`
+	Word 			db.Word 			`json:"word"`
 	Usecase 	db.Usecase 		`json:"usecase"`
 	Examples  []db.Example   `json:"examples"`
 }
@@ -35,18 +35,19 @@ func (server *Server) GetExercise(ctx *gin.Context) {
 }
 
 
-func GetExercise(ctx context.Context, store db.Store, req GetExerciseRequest) (Exercise, error) {	
+func GetExercise(ctx *gin.Context, store db.Store, req GetExerciseRequest) (Exercise, error) {	
 	exercise := Exercise{}
-	/*
-	user, err := store.GetUserById(ctx, int64(userId))
+	
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	username := authPayload.Username
+	
+	user, err := store.GetUserByUsername(ctx, username)
 	if err != nil {
 		return exercise, err
 	}
-	*/
 	
-	//user.StudyIndex
-	var err error
-	exercise.Usecase, err = store.GetUsecaseById(ctx, 0)
+	usecaseId := user.StudyIndex
+	exercise.Usecase, err = store.GetUsecaseById(ctx, usecaseId)
 	if err != nil {
 		return exercise, err
 	}

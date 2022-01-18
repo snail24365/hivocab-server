@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 type Store interface {
-	Querier
+	Querier	
 }
 
 type SQLStore struct {
@@ -14,7 +14,7 @@ type SQLStore struct {
 	db *sql.DB
 }
 
-func NewStore(db *sql.DB) Store {
+func NewStore(db *sql.DB) *SQLStore {
 	return &SQLStore{
 		db: db,
 		Queries: New(db),
@@ -22,7 +22,7 @@ func NewStore(db *sql.DB) Store {
 }
 
 // execTx executes a function within a database transaction
-func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) error {
+func (store *SQLStore) ExecTx(ctx context.Context, fn func(*Queries) error) error {
 	tx, err := store.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
