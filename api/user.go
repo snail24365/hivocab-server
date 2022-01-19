@@ -69,8 +69,8 @@ func (server *Server) Login(ctx *gin.Context) {
 	user, err := server.store.GetUserByUsername(ctx, req.Username)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, errorResponse(err))
-			return 	
+			ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+			return
 		}
 		ctx.JSON(http.StatusInternalServerError , errorResponse(err))
 		return 
@@ -95,5 +95,6 @@ func (server *Server) Login(ctx *gin.Context) {
 		AccessToken: accessToken,
 		Username: user.Username,
 	}
+
 	ctx.JSON(http.StatusOK, rsp)
 }

@@ -28,19 +28,24 @@ func NewServer(config util.Config, store db.SQLStore)	 (*Server, error)  {
 		tokenMaker: tokenMaker,
 	}
 	
-	router := gin.Default()
-	router.POST("/user", server.CreateUser)
-	router.POST("/login", server.Login)
 	
+
+	router := gin.Default()
+	router.Use(CORSMiddleware())
+		
+	publicRoutes := router.Group("/")
+	publicRoutes.POST("/user", server.CreateUser)
+	publicRoutes.POST("/login", server.Login)
 
 	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
 	authRoutes.GET("/exercise", server.GetExercise)
 	authRoutes.GET("/word", server.GetWords)
+	authRoutes.GET("/ping", server.AuthPing)
 	//authRoutes.POST("/logout", server.Logout)
 	//authRoutes.GET("/report", server.AnalysisStudy)
 	//authRoutes.POST("/writing", server.PostWriting)
 	//authRoutes.DELETE("/writing", server.DeleteWriting)
-	
+
 
 	server.router = router
 	return server, nil
