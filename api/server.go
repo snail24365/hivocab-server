@@ -39,11 +39,18 @@ func NewServer(config util.Config, store db.SQLStore)	 (*Server, error)  {
 
 	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
 	authRoutes.GET("/exercise", server.GetExercise)
-	authRoutes.GET("/word", server.GetWords)
+	authRoutes.GET("/word", server.GetWord)
+	authRoutes.GET("/word/count", server.GetCountTotalWord)
 	authRoutes.GET("/ping", server.AuthPing)
+	authRoutes.POST("/exercise/next", server.NextExercise)
+	
 	//authRoutes.POST("/logout", server.Logout)
 	//authRoutes.GET("/report", server.AnalysisStudy)
-	//authRoutes.POST("/writing", server.PostWriting)
+	authRoutes.GET("/writing", server.FetchWriting)
+	authRoutes.POST("/writing", server.EnrollWriting)
+	
+	
+
 	//authRoutes.DELETE("/writing", server.DeleteWriting)
 
 

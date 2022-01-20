@@ -15,7 +15,7 @@ type UsernamePassword struct {
 	Password string `json:"password" binding:"required"`
 }
 
-func (server *Server) CreateUser(ctx *gin.Context) {
+	func (server *Server) CreateUser(ctx *gin.Context) {
 	var req UsernamePassword
 	
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -83,7 +83,7 @@ func (server *Server) Login(ctx *gin.Context) {
 	}
 
 	accessToken, err := server.tokenMaker.CreateToken(
-		user.Username,
+		user,
 		server.config.AccessTokenDuration,
 	)
 	if err != nil {

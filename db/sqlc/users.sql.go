@@ -81,3 +81,32 @@ func (q *Queries) InsertUser(ctx context.Context, arg InsertUserParams) (User, e
 	)
 	return i, err
 }
+
+const moveNextExercise = `-- name: MoveNextExercise :one
+UPDATE users 
+SET study_index = $1
+WHERE username = $2
+RETURNING id, username, password, latest_visit, study_amount, study_goal, password_changed_at, created_at, study_index
+`
+
+type MoveNextExerciseParams struct {
+	StudyIndex int64  `json:"study_index"`
+	Username   string `json:"username"`
+}
+
+func (q *Queries) MoveNextExercise(ctx context.Context, arg MoveNextExerciseParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, moveNextExercise, arg.StudyIndex, arg.Username)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Password,
+		&i.LatestVisit,
+		&i.StudyAmount,
+		&i.StudyGoal,
+		&i.PasswordChangedAt,
+		&i.CreatedAt,
+		&i.StudyIndex,
+	)
+	return i, err
+}

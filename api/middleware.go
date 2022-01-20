@@ -13,6 +13,8 @@ const (
 	authorizationHeaderKey  = "authorization"
 	authorizationTypeBearer = "bearer"
 	authorizationPayloadKey = "authorization_payload"
+	authorizationUsernameKey = "username"
+	authorizationUserIdKey = "user_id"
 )
 
 func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
@@ -42,8 +44,9 @@ func authMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
 			return
 		}
-
+		ctx.Set(authorizationUsernameKey, payload.Username)
 		ctx.Set(authorizationPayloadKey, payload)
+		ctx.Set(authorizationUserIdKey, payload.UserId)
 		ctx.Next()
 	}
 }

@@ -24,6 +24,37 @@ func (server *Server) GetExercise(ctx *gin.Context) {
 }
 
 
+func (server *Server) NextExercise(ctx *gin.Context) {
+username := ctx.GetString(authorizationUsernameKey)
+	user, err := server.store.GetUserByUsername(ctx, username)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, nil)
+		return
+	}
+	
+	numUsecase, err := server.store.CountAllUsecase(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, nil)
+		return
+	}
+
+	nextIndex := (user.StudyIndex + 1) % numUsecase
+	_, err = server.store.MoveNextExercise(ctx, db.MoveNextExerciseParams{
+		nextIndex,
+		username,
+	})
+
+	exercise, err := GetExercise(ctx, server.store)
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, exercise)
+}
+
+
 func GetExercise(ctx *gin.Context, store db.Store) (Exercise, error) {	
 	exercise := Exercise{}
 	

@@ -85,38 +85,6 @@ func (q *Queries) GetWordBySpelling(ctx context.Context, spelling string) (Word,
 	return i, err
 }
 
-const getWords = `-- name: GetWords :many
-SELECT id, spelling FROM word LIMIT $1 OFFSET $2
-`
-
-type GetWordsParams struct {
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"offset"`
-}
-
-func (q *Queries) GetWords(ctx context.Context, arg GetWordsParams) ([]Word, error) {
-	rows, err := q.db.QueryContext(ctx, getWords, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Word{}
-	for rows.Next() {
-		var i Word
-		if err := rows.Scan(&i.ID, &i.Spelling); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const insertWord = `-- name: InsertWord :one
 INSERT INTO word (
   id,

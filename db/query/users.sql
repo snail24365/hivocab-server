@@ -13,3 +13,11 @@ INSERT INTO users (
   $2
 )
 RETURNING *;
+
+-- name: MoveNextExercise :one
+UPDATE users 
+SET study_index = $1
+WHERE username = $2
+RETURNING *;
+
+

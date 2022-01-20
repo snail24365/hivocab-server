@@ -20,12 +20,14 @@ type Querier interface {
 	GetWordById(ctx context.Context, id int64) (Word, error)
 	GetWordByPage(ctx context.Context, arg GetWordByPageParams) ([]Word, error)
 	GetWordBySpelling(ctx context.Context, spelling string) (Word, error)
-	GetWords(ctx context.Context, arg GetWordsParams) ([]Word, error)
+	GetWritingsByUserIdAndUsecaseId(ctx context.Context, arg GetWritingsByUserIdAndUsecaseIdParams) ([]Writing, error)
 	InsertExample(ctx context.Context, arg InsertExampleParams) (Example, error)
 	InsertUsecase(ctx context.Context, arg InsertUsecaseParams) (Usecase, error)
 	InsertUser(ctx context.Context, arg InsertUserParams) (User, error)
 	InsertWord(ctx context.Context, arg InsertWordParams) (Word, error)
+	InsertWriting(ctx context.Context, arg InsertWritingParams) (Writing, error)
 	ListExampleByUsecase(ctx context.Context, usecaseID int64) ([]Example, error)
+	MoveNextExercise(ctx context.Context, arg MoveNextExerciseParams) (User, error)
 }
 
 var _ Querier = (*Queries)(nil)
