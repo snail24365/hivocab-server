@@ -5,7 +5,25 @@ package db
 
 import (
 	"context"
+	"time"
 )
+
+const getStudyInfoById = `-- name: GetStudyInfoById :one
+SELECT study_goal,study_amount,latest_visit FROM users WHERE id = $1
+`
+
+type GetStudyInfoByIdRow struct {
+	StudyGoal   int32     `json:"study_goal"`
+	StudyAmount int32     `json:"study_amount"`
+	LatestVisit time.Time `json:"latest_visit"`
+}
+
+func (q *Queries) GetStudyInfoById(ctx context.Context, id int64) (GetStudyInfoByIdRow, error) {
+	row := q.db.QueryRowContext(ctx, getStudyInfoById, id)
+	var i GetStudyInfoByIdRow
+	err := row.Scan(&i.StudyGoal, &i.StudyAmount, &i.LatestVisit)
+	return i, err
+}
 
 const getUserById = `-- name: GetUserById :one
 SELECT id, username, password, latest_visit, study_amount, study_goal, password_changed_at, created_at, study_index FROM users WHERE id = $1

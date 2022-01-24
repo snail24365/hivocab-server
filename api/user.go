@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	db "github.com/snail24365/hivocab-server/db/sqlc"
@@ -11,16 +12,15 @@ import (
 )
 
 type UsernamePassword struct {
-	Username string `json:"username" binding:"required,alphanum"`
-	Password string `json:"password" binding:"required"`
+	Username string `json:"username" binding:"required,alphanum,min=5"`
+	Password string `json:"password" binding:"required,min=8"`
 }
 
-	func (server *Server) CreateUser(ctx *gin.Context) {
+func (server *Server) CreateUser(ctx *gin.Context) {
 	var req UsernamePassword
 	
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
 	}
 
 	existing, err := server.store.GetUserByUsername(ctx, req.Username)
@@ -98,3 +98,74 @@ func (server *Server) Login(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, rsp)
 }
+
+func (server *Server) GetStudyInfo(ctx *gin.Context) {
+	userId, exist := ctx.Get(authorizationUserIdKey)
+	if !exist {
+		ctx.JSON(http.StatusUnauthorized, nil)
+		return
+	}
+	studyInfo, err := server.store.GetStudyInfoById(ctx, userId.(int64))
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, nil)
+		return
+	}
+	now := time.Now()
+	todayEnd := time.Date(now.Year(), now.Month(), now.Day(), 24, 0, 0, 0, time.UTC);
+	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC);
+	lastWeek := todayStart.AddDate(0, 0, -7)
+
+	weekWritingStatistics, err := server.store.CountWritingsGroupByCreateAt(ctx, db.CountWritingsGroupByCreateAtParams{
+		UserID: userId.(int64), 
+		CreatedAt: lastWeek,
+		CreatedAt_2: todayEnd,
+	})
+
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, nil)
+		return
+	}
+	
+	weekAgo := time.Now().AddDate(0, 0, -6)
+	var attendanceTable []AttendanceCell
+	
+	oneWeek := 7
+	for offset := 0; offset < oneWeek; offset++ {
+		day := weekAgo.AddDate(0, 0, offset).Day()
+		
+		attendanceTable = append(attendanceTable, AttendanceCell{
+			Day: day,
+			Count: 0,
+		})
+	}
+
+	for _, dayWritingStatistics := range weekWritingStatistics {
+		for i, x := range attendanceTable {
+			if int(dayWritingStatistics.Day) == x.Day {
+				a := &attendanceTable[i]
+				a.Count = int(dayWritingStatistics.Count)
+				//attendanceTable[i].Count = x.Count
+			}
+		}			
+	}
+
+	ctx.JSON(http.StatusOK, GetStudyInfoResponse{
+		StudyGoal: studyInfo.StudyGoal,
+		StudyAmount: studyInfo.StudyAmount,
+		LatestVisit: studyInfo.LatestVisit,
+		CountByDay: attendanceTable,
+	})
+}
+
+type AttendanceCell struct {
+	Day   int `json:"day"`
+	Count int   `json:"count"`
+}
+
+type GetStudyInfoResponse struct {
+	StudyGoal   int32     `json:"study_goal"`
+	StudyAmount int32     `json:"study_amount"`
+	LatestVisit time.Time `json:"latest_visit"`
+	CountByDay []AttendanceCell `json:"writing_count_per_day"`
+}
+

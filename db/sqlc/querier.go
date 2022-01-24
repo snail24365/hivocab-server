@@ -10,9 +10,11 @@ type Querier interface {
 	CountAllExample(ctx context.Context) (int64, error)
 	CountAllUsecase(ctx context.Context) (int64, error)
 	CountAllWord(ctx context.Context) (int64, error)
+	CountWritingsGroupByCreateAt(ctx context.Context, arg CountWritingsGroupByCreateAtParams) ([]CountWritingsGroupByCreateAtRow, error)
 	DeleteAllExample(ctx context.Context) error
 	DeleteAllUsecase(ctx context.Context) error
 	DeleteAllWord(ctx context.Context) error
+	GetStudyInfoById(ctx context.Context, id int64) (GetStudyInfoByIdRow, error)
 	GetUsecaseById(ctx context.Context, id int64) (Usecase, error)
 	GetUsecaseByWord(ctx context.Context, wordID int64) ([]Usecase, error)
 	GetUserById(ctx context.Context, id int64) (User, error)

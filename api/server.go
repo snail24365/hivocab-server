@@ -49,7 +49,7 @@ func NewServer(config util.Config, store db.SQLStore)	 (*Server, error)  {
 	authRoutes.GET("/writing", server.FetchWriting)
 	authRoutes.POST("/writing", server.EnrollWriting)
 	
-	
+	authRoutes.GET("/user/study-info", server.GetStudyInfo)
 
 	//authRoutes.DELETE("/writing", server.DeleteWriting)
 

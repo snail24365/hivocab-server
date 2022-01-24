@@ -5,7 +5,54 @@ package db
 
 import (
 	"context"
+	"time"
 )
+
+const countWritingsGroupByCreateAt = `-- name: CountWritingsGroupByCreateAt :many
+SELECT EXTRACT (DAY FROM created_at) as Day, COUNT(user_id) as Count 
+FROM 
+(SELECT id, writing, usecase_id, user_id, created_at FROM writing 
+ORDER BY EXTRACT (MONTH FROM created_at) ASC, EXTRACT (DAY FROM created_at) ASC
+) AS ordered_table
+WHERE user_id = $1 
+AND created_at >= $2 
+AND created_at <= $3
+GROUP BY EXTRACT (DAY FROM created_at)
+`
+
+type CountWritingsGroupByCreateAtParams struct {
+	UserID      int64     `json:"user_id"`
+	CreatedAt   time.Time `json:"created_at"`
+	CreatedAt_2 time.Time `json:"created_at_2"`
+}
+
+type CountWritingsGroupByCreateAtRow struct {
+	Day   float64 `json:"day"`
+	Count int64   `json:"count"`
+}
+
+func (q *Queries) CountWritingsGroupByCreateAt(ctx context.Context, arg CountWritingsGroupByCreateAtParams) ([]CountWritingsGroupByCreateAtRow, error) {
+	rows, err := q.db.QueryContext(ctx, countWritingsGroupByCreateAt, arg.UserID, arg.CreatedAt, arg.CreatedAt_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []CountWritingsGroupByCreateAtRow{}
+	for rows.Next() {
+		var i CountWritingsGroupByCreateAtRow
+		if err := rows.Scan(&i.Day, &i.Count); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
 
 const getWritingsByUserIdAndUsecaseId = `-- name: GetWritingsByUserIdAndUsecaseId :many
 SELECT id, writing, usecase_id, user_id, created_at FROM writing WHERE user_id = $1 AND usecase_id = $2

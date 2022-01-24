@@ -21,3 +21,7 @@ WHERE username = $2
 RETURNING *;
 
 
+-- name: GetStudyInfoById :one
+SELECT study_goal,study_amount,latest_visit FROM users WHERE id = $1;
+
+
