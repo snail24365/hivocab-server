@@ -14,6 +14,7 @@ type Querier interface {
 	DeleteAllExample(ctx context.Context) error
 	DeleteAllUsecase(ctx context.Context) error
 	DeleteAllWord(ctx context.Context) error
+	DeleteWriting(ctx context.Context, id int64) error
 	GetStudyInfoById(ctx context.Context, id int64) (GetStudyInfoByIdRow, error)
 	GetUsecaseById(ctx context.Context, id int64) (Usecase, error)
 	GetUsecaseByWord(ctx context.Context, wordID int64) ([]Usecase, error)
@@ -22,6 +23,7 @@ type Querier interface {
 	GetWordById(ctx context.Context, id int64) (Word, error)
 	GetWordByPage(ctx context.Context, arg GetWordByPageParams) ([]Word, error)
 	GetWordBySpelling(ctx context.Context, spelling string) (Word, error)
+	GetWritingsById(ctx context.Context, id int64) (Writing, error)
 	GetWritingsByUserIdAndUsecaseId(ctx context.Context, arg GetWritingsByUserIdAndUsecaseIdParams) ([]Writing, error)
 	InsertExample(ctx context.Context, arg InsertExampleParams) (Example, error)
 	InsertUsecase(ctx context.Context, arg InsertUsecaseParams) (Usecase, error)
@@ -30,6 +32,7 @@ type Querier interface {
 	InsertWriting(ctx context.Context, arg InsertWritingParams) (Writing, error)
 	ListExampleByUsecase(ctx context.Context, usecaseID int64) ([]Example, error)
 	MoveNextExercise(ctx context.Context, arg MoveNextExerciseParams) (User, error)
+	UpdateGoal(ctx context.Context, arg UpdateGoalParams) (User, error)
 }
 
 var _ Querier = (*Queries)(nil)

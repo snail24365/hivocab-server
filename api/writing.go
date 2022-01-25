@@ -69,5 +69,34 @@ func (server *Server) EnrollWriting(ctx *gin.Context) {
 }
 
 func (server *Server) DeleteWriting(ctx *gin.Context) {
+	writingIdStr := ctx.Query("id")
+	
+	writingId, err := strconv.ParseInt(writingIdStr, 10, 64)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, nil)
+		return
+	}
+
+	userId, exists := ctx.Get(authorizationUserIdKey)
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, nil)
+		return 
+	}
+	
+	writing, err := server.store.GetWritingsById(ctx, writingId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, nil)
+		return
+	}
+	if writing.UserID != userId {
+		ctx.JSON(http.StatusUnauthorized, nil)
+		return
+	}
+	server.store.DeleteWriting(ctx, writing.ID)
 	ctx.JSON(http.StatusOK, nil)
+	return
+}
+
+type DeleteWritingReq struct {
+	id int64 `json: "id"`
 }

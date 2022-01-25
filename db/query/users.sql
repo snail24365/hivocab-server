@@ -24,4 +24,8 @@ RETURNING *;
 -- name: GetStudyInfoById :one
 SELECT study_goal,study_amount,latest_visit FROM users WHERE id = $1;
 
-
+-- name: UpdateGoal :one
+UPDATE users
+SET study_goal = $2
+WHERE id = $1
+RETURNING *;

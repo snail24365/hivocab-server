@@ -3,6 +3,7 @@ package api
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -111,10 +112,15 @@ func (server *Server) GetStudyInfo(ctx *gin.Context) {
 		return
 	}
 	now := time.Now()
-	todayEnd := time.Date(now.Year(), now.Month(), now.Day(), 24, 0, 0, 0, time.UTC);
-	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC);
+	loc, _ := time.LoadLocation("Asia/Seoul")
+	todayEnd := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 59, loc);
+	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, loc);
 	lastWeek := todayStart.AddDate(0, 0, -7)
 
+	a1 := todayEnd.Day()
+	b1 := todayEnd.Hour()
+	fmt.Print(a1,b1)
+	
 	weekWritingStatistics, err := server.store.CountWritingsGroupByCreateAt(ctx, db.CountWritingsGroupByCreateAtParams{
 		UserID: userId.(int64), 
 		CreatedAt: lastWeek,
@@ -142,16 +148,19 @@ func (server *Server) GetStudyInfo(ctx *gin.Context) {
 	for _, dayWritingStatistics := range weekWritingStatistics {
 		for i, x := range attendanceTable {
 			if int(dayWritingStatistics.Day) == x.Day {
-				a := &attendanceTable[i]
-				a.Count = int(dayWritingStatistics.Count)
+				attendanceRef := &attendanceTable[i]
+				attendanceRef.Count = int(dayWritingStatistics.Count)
 				//attendanceTable[i].Count = x.Count
 			}
 		}			
 	}
 
+	todayStudyAmount := attendanceTable[len(attendanceTable)-1].Count
+
+
 	ctx.JSON(http.StatusOK, GetStudyInfoResponse{
 		StudyGoal: studyInfo.StudyGoal,
-		StudyAmount: studyInfo.StudyAmount,
+		StudyAmount: int32(todayStudyAmount),
 		LatestVisit: studyInfo.LatestVisit,
 		CountByDay: attendanceTable,
 	})
@@ -169,3 +178,31 @@ type GetStudyInfoResponse struct {
 	CountByDay []AttendanceCell `json:"writing_count_per_day"`
 }
 
+func (server *Server) UpdateGoal(ctx *gin.Context) {
+	userId, exist := ctx.Get(authorizationUserIdKey)
+	if !exist {
+		ctx.JSON(http.StatusUnauthorized, nil)
+		return
+	}
+
+	var req UpdateGoalReq
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+	}
+	
+	updated, err := server.store.UpdateGoal(ctx, db.UpdateGoalParams{
+		ID: userId.(int64),
+		StudyGoal: req.StudyGoal,
+	})
+	
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, nil)
+		return
+	}
+	updated.Password = ""
+	ctx.JSON(http.StatusOK, updated)
+}
+
+type UpdateGoalReq struct {
+	StudyGoal   int32     `json:"study_goal"`
+}

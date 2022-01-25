@@ -45,6 +45,8 @@ username := ctx.GetString(authorizationUsernameKey)
 		username,
 	})
 
+	
+
 	exercise, err := GetExercise(ctx, server.store)
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, err)

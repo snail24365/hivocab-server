@@ -128,3 +128,32 @@ func (q *Queries) MoveNextExercise(ctx context.Context, arg MoveNextExercisePara
 	)
 	return i, err
 }
+
+const updateGoal = `-- name: UpdateGoal :one
+UPDATE users
+SET study_goal = $2
+WHERE id = $1
+RETURNING id, username, password, latest_visit, study_amount, study_goal, password_changed_at, created_at, study_index
+`
+
+type UpdateGoalParams struct {
+	ID        int64 `json:"id"`
+	StudyGoal int32 `json:"study_goal"`
+}
+
+func (q *Queries) UpdateGoal(ctx context.Context, arg UpdateGoalParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, updateGoal, arg.ID, arg.StudyGoal)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Password,
+		&i.LatestVisit,
+		&i.StudyAmount,
+		&i.StudyGoal,
+		&i.PasswordChangedAt,
+		&i.CreatedAt,
+		&i.StudyIndex,
+	)
+	return i, err
+}

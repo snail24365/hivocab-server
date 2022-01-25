@@ -54,6 +54,32 @@ func (q *Queries) CountWritingsGroupByCreateAt(ctx context.Context, arg CountWri
 	return items, nil
 }
 
+const deleteWriting = `-- name: DeleteWriting :exec
+DELETE FROM writing WHERE id = $1
+`
+
+func (q *Queries) DeleteWriting(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deleteWriting, id)
+	return err
+}
+
+const getWritingsById = `-- name: GetWritingsById :one
+SELECT id, writing, usecase_id, user_id, created_at FROM writing WHERE id = $1
+`
+
+func (q *Queries) GetWritingsById(ctx context.Context, id int64) (Writing, error) {
+	row := q.db.QueryRowContext(ctx, getWritingsById, id)
+	var i Writing
+	err := row.Scan(
+		&i.ID,
+		&i.Writing,
+		&i.UsecaseID,
+		&i.UserID,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const getWritingsByUserIdAndUsecaseId = `-- name: GetWritingsByUserIdAndUsecaseId :many
 SELECT id, writing, usecase_id, user_id, created_at FROM writing WHERE user_id = $1 AND usecase_id = $2
 `

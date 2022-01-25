@@ -42,4 +42,4 @@ func (server *Server) GetWord(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, words)
 }
 
-const pageSize = 20
+const pageSize = 30

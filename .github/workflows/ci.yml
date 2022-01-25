@@ -18,6 +18,7 @@ jobs:
           POSTGRES_USER: root
           POSTGRES_PASSWORD: secret
           POSTGRES_DB: hivocab
+          TZ: 'Asia/Seoul'
 
         ports:
           - 5432:5432

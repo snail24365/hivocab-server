@@ -23,3 +23,9 @@ WHERE user_id = $1
 AND created_at >= $2 
 AND created_at <= $3
 GROUP BY EXTRACT (DAY FROM created_at);
+
+-- name: DeleteWriting :exec
+DELETE FROM writing WHERE id = $1;
+
+-- name: GetWritingsById :one
+SELECT * FROM writing WHERE id = $1;
