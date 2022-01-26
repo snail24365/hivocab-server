@@ -20,7 +20,3 @@ services:
       - postgres
     entrypoint: ["/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh"]
     command: ["/app/main"]
-  react:
-    image: snail24365/hivocab-react
-    ports:
-      - "80:3000"
