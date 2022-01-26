@@ -4,7 +4,7 @@ services:
     image: postgres:12-alpine
     environment:
       - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=enteryourpassword
+      - POSTGRES_PASSWORD=secret
       - POSTGRES_DB=hivocab
       - TZ=Asia/Seoul
   api:
@@ -14,7 +14,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DB_SOURCE=postgresql://root:enteryourpassword@postgres:5432/hivocab?sslmode=disable
+      - DB_SOURCE=postgresql://root:secret@postgres:5432/hivocab?sslmode=disable
       - GIN_MODE=release
     depends_on:
       - postgres

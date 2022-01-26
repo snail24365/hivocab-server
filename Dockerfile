@@ -9,6 +9,11 @@ RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.14.1/
 
 # Run Stage
 FROM alpine:3.15
+ENV TZ=Asia/Seoul
+RUN apk add --no-cache tzdata && \
+    cp /usr/share/zoneinfo/$TZ /etc/localtime && \
+    echo $TZ > /etc/timezone
+
 WORKDIR /app
 COPY --from=builder /app/main .
 COPY --from=builder /app/migrate.linux-amd64 ./migrate
@@ -23,7 +28,9 @@ COPY wait-for.sh .
 RUN ["chmod", "+x", "./wait-for.sh"]
 COPY db/migration ./migration
 
- 
+ADD zoneinfo.zip /
+ENV ZONEINFO /zoneinfo.zip
+
 EXPOSE 8080
 CMD ["/app/main"]
 ENTRYPOINT [ "/app/start.sh" ]
