@@ -8,10 +8,10 @@ dropdb:
 	docker exec -it postgres12 dropdb hivocab
 
 migrateup:
-	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/hivocab?sslmode=disable" -verbose up
+	migrate -path db/migration -database "postgresql://root:enteryourpassword@localhost:5432/hivocab?sslmode=disable" -verbose up
 
 migratedown:
-	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/hivocab?sslmode=disable" -verbose down
+	migrate -path db/migration -database "postgresql://root:enteryourpassword@localhost:5432/hivocab?sslmode=disable" -verbose down
 
 sqlc:
 	sqlc generate

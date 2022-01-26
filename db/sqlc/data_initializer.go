@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"math/rand"
 )
@@ -102,9 +103,11 @@ func parseVocab() ([]DecodeWord, []DecodeUsecase, []DecodeExample){
 	usecaseUri := base + "useCase.json"
 	exampleUri := base + "example.json"
 
-	wordData, _ := ioutil.ReadFile(wordUri)
-	usecaseData, _ := ioutil.ReadFile(usecaseUri)
-	exampleData, _ := ioutil.ReadFile(exampleUri)
+	wordData, e1 := ioutil.ReadFile(wordUri)
+	usecaseData, e2 := ioutil.ReadFile(usecaseUri)
+	exampleData, e3 := ioutil.ReadFile(exampleUri)
+
+	fmt.Println(e1,e2,e3)
 
 	// enough size for all of the above files
 	maxSize := 80000
