@@ -1,6 +1,6 @@
 module github.com/snail24365/hivocab-server
 
-go 1.17
+go 1.16
 
 require (
 	github.com/gin-gonic/gin v1.7.7

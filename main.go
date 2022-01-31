@@ -2,7 +2,8 @@ package main
 
 import (
 	"database/sql"
-	"log"
+
+	log "github.com/sirupsen/logrus"
 
 	_ "github.com/lib/pq"
 	"github.com/snail24365/hivocab-server/api"
@@ -13,6 +14,7 @@ import (
 func main() {
 	config, err := util.LoadConfig(".")
 	if err != nil {
+		
 		log.Fatal("cannot load config:", err)
 	}
 	
