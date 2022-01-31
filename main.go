@@ -12,9 +12,10 @@ import (
 )
 
 func main() {
+	log.Info("app start", 999)
+
 	config, err := util.LoadConfig(".")
 	if err != nil {
-		
 		log.Fatal("cannot load config:", err)
 	}
 	

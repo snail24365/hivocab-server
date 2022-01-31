@@ -28,7 +28,9 @@ func NewServer(config util.Config, store db.SQLStore)	 (*Server, error)  {
 		tokenMaker: tokenMaker,
 	}
 	
-	router := gin.Default()
+	
+	router := gin.New()
+	router.Use(gin.Logger(), gin.Recovery())
 	router.Use(CORSMiddleware())
 		
 	publicRoutes := router.Group("/")
