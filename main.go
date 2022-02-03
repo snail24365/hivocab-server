@@ -3,16 +3,14 @@ package main
 import (
 	"database/sql"
 
-	log "github.com/sirupsen/logrus"
-
 	_ "github.com/lib/pq"
+	log "github.com/sirupsen/logrus"
 	"github.com/snail24365/hivocab-server/api"
 	db "github.com/snail24365/hivocab-server/db/sqlc"
 	"github.com/snail24365/hivocab-server/util"
 )
 
 func main() {
-	log.Info("app start", 999)
 
 	config, err := util.LoadConfig(".")
 	if err != nil {

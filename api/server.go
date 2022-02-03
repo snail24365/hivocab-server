@@ -27,12 +27,11 @@ func NewServer(config util.Config, store db.SQLStore)	 (*Server, error)  {
 		store:      store,
 		tokenMaker: tokenMaker,
 	}
-	
-	
-	router := gin.New()
-	router.Use(gin.Logger(), gin.Recovery())
+
+	router := gin.Default()
+
 	router.Use(CORSMiddleware())
-		
+	
 	publicRoutes := router.Group("/")
 	publicRoutes.POST("/user", server.CreateUser)
 	publicRoutes.POST("/login", server.Login)
